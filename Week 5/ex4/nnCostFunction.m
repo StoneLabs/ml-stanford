@@ -62,23 +62,72 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
+K = num_labels;
+
+a1 = [ones(m, 1) X];
+a2 = sigmoid(a1 * Theta1');
+a2 = [ones(m, 1) a2];
+a3 = sigmoid(a2 * Theta2');
+
+sum = 0; % Calculate cost
+for i = 1:m
+  for k = 1:K
+    sum += -(y(i)==k) * log(a3(i, k)) - (1-(y(i)==k))*log(1-a3(i, k));
+  end
+end
+J = sum/m;
+
+sum = 0; % Calculate regularization
+for i = 1:input_layer_size
+  for j = 1:hidden_layer_size
+    sum += Theta1(j, i+1)^2;
+  end
+end
+for i = 1:hidden_layer_size
+  for j = 1:num_labels
+    sum += Theta2(j, i+1)^2;
+  end
+end
+J += lambda/(2*m) * sum;
+
+Delta2 = 0;
+Delta1 = 0;
+for t = 1:m % BACKPROPAGATION ALGORITHM
+  %% STEP 1 %%
+  a1 = [1; X(t, :)'];
+  
+  z2 = (a1' * Theta1')';
+  a2 = [1; sigmoid(z2)];
+  
+  z3 = (a2' * Theta2')';
+  a3 = sigmoid(z3);
+  
+  %% STEP 2 %%
+  delta3 = zeros(num_labels, 1);
+  for k = 1:num_labels
+    delta3(k) = (a3(k) - (y(t)==k));
+  end
+  
+  %% STEP 3 %%
+  delta2 = (Theta2' * delta3)(2:end) .* sigmoidGradient(z2);
+
+  %% STEP 4 %%
+  Delta2 = Delta2 + delta3 * a2'; % 25x401
+  Delta1 = Delta1 + delta2 * a1'; % 10x26
+end
+
+%% STEP 5 %%
+D2 = (1/m) .* Delta2 + lambda/m * Theta2;
+D2(:, 1) = (1/m) .* Delta2(:, 1); % Do not regularization
+                                  % for j = 0 (1 in octave)
 
 
+D1 = (1/m) .* Delta1 + lambda/m * Theta1;
+D1(:, 1) = (1/m) .* Delta1(:, 1); % Do not regularization
+                                  % for j = 0 (1 in octave)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Theta2_grad = D2; % Set return values which
+Theta1_grad = D1; % will get unrolled below
 
 % -------------------------------------------------------------
 
