@@ -80,6 +80,7 @@ for i = 1:m
 
     pred = predict(Theta1, Theta2, X(rp(i),:));
     fprintf('\nNeural Network Prediction: %d (digit %d)\n', pred, mod(pred, 10));
+    title(strcat("HYPOTHESIS:    ", int2str(mod(pred, 10))), "fontsize", 20);
     
     % Pause with quit option
     s = input('Paused - press enter to continue, q to exit:','s');
